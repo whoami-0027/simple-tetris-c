@@ -42,9 +42,9 @@ and then rebuild the project.
 
 ## Additional information:
 
-- You can change the speed by modifying `GAME_DISTANCE_GAIN_RATE` in `game.h`. Default is set to `3.5`.
+- You can change the speed by modifying `GAME_DISTANCE_GAIN_RATE` in `game.h`. Default is set to `1.5`.
 - You can also change the size of playfield by modifying `GAME_PLAYFIELD_W` and `GAME_PLAYFIELD_H`. Default are `10` and `24` respectively, but I don't recommend changing it to anything below these values.
-- If you want to change the [Lock delay](https://tetris.wiki/Lock_delay), change the value of `GAME_LOCK_DELAY_FRAME_LIMIT`. Default is `18`.
+- If you want to reduce or increase duration of [lock delay](https://tetris.wiki/Lock_delay), change the value of `GAME_LOCK_DELAY_FRAME_LIMIT`. Default is `18`.
 - And don't forget to rebuild after making these changes :D
 
 ## License:
