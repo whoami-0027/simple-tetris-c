@@ -8,7 +8,7 @@
 #define GAME_FPS (time_t)(60)
 #define GAME_UPDATE_INTERVAL (time_t)(1000 / GAME_FPS)
 #define GAME_FUZZY_TIME_INTERVAL 15
-#define GAME_SLIDE_FRAME_LIMIT 18
+#define GAME_LOCK_DELAY_FRAME_LIMIT 18
 #define GAME_CELL_EMPTY_CHAR ' '
 #define GAME_CELL_OCCUPIED_CHAR '#'
 #define GAME_CELL_STATE_OCCUPIED true
@@ -56,8 +56,8 @@ extern bool game_flag_keyPressed_Q;
 extern bool game_flag_forceTerminationRequested;
 extern bool game_flag_terminated;
 extern bool game_flag_blockExisting;
-extern bool game_flag_enableslideFrameCounter;
-extern int game_slideFrameCounter;
+extern bool game_flag_enableLockDelayFrameCounter;
+extern int game_lockDelayFrameCounter;
 extern int game_init_returnCode;
 extern int game_update_returnCode;
 extern int game_playerScore;

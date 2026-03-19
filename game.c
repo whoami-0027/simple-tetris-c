@@ -235,8 +235,8 @@ bool game_flag_keyPressed_S = false;
 bool game_flag_forceTerminationRequested = true;
 bool game_flag_terminated = false;
 bool game_flag_blockExisting = false;
-bool game_flag_enableSlideFrameCounter = false;
-int game_SlideFrameCounter = 0;
+bool game_flag_enableLockDelayFrameCounter = false;
+int game_lockDelayFrameCounter = 0;
 int game_init_returnCode = ERROR_NONE;
 int game_update_returnCode = ERROR_NONE;
 int game_exitCode = ERROR_NONE;
@@ -368,7 +368,7 @@ bool checkBlockValidState(const enum rotation_state rstate) {
 
 bool checkTerminated() {
         for(int column = 0; column < GAME_PLAYFIELD_W; column++) {
-                if(game_cellState[22][column])
+                if(game_cellState[GAME_PLAYFIELD_VISIBLE_H - 2][column])
                         return true;
         }
 
@@ -515,8 +515,8 @@ int game_func_update() {
                                 distanceAccumulator = 0.f;
                         }
                 } else {
-                        game_flag_enableSlideFrameCounter = true;
-                        if(game_SlideFrameCounter >= GAME_SLIDE_FRAME_LIMIT) {
+                        game_flag_enableLockDelayFrameCounter = true;
+                        if(game_lockDelayFrameCounter >= GAME_LOCK_DELAY_FRAME_LIMIT) {
                                 for(int row = 0; row < 4; row++) {
                                         for(int column = 0; column < 4; column++) {
                                                 if(game_currentBlockTemplate[row][column])
@@ -525,10 +525,10 @@ int game_func_update() {
                                 }
 
                                 game_flag_blockExisting = false;
-                                game_flag_enableSlideFrameCounter = false;
-                                game_SlideFrameCounter = 0;
-                        } else if(game_flag_enableSlideFrameCounter)
-                                game_SlideFrameCounter++;
+                                game_flag_enableLockDelayFrameCounter = false;
+                                game_lockDelayFrameCounter = 0;
+                        } else if(game_flag_enableLockDelayFrameCounter)
+                                game_lockDelayFrameCounter++;
                 }
         }
 
