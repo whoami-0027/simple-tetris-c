@@ -1,11 +1,13 @@
 #include "game.h"
 
+#include <processenv.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <string.h>
 #include <stdbool.h>
 #include <time.h>
+#include <windows.h>
 
 const bool game_blockTemplate[TYPE_COUNT][STATE_COUNT][4][4] = {
         // Type: O
@@ -406,12 +408,17 @@ int game_func_init() {
         // Set seed for rand() to ensure that each time it runs, it will generate a randomized number
         srand(time(NULL));
 
+        // Clear the console
+        system("cls");
+
         return game_init_returnCode = ERROR_NONE;
 }
 
 int game_func_draw() {
-        // Clear the console
-        system("cls");
+        // Move cursor back to the beginning of the console instead of clearing the whole console and draw again
+        COORD cursorPos;
+        cursorPos = (COORD){0, 0};
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPos);
 
         // Draw the playfield and the scoreboard
         drawPlayfield();
