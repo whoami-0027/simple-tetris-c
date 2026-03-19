@@ -3,7 +3,7 @@
 
 A (very) simple console-based tetris clone made entirely in C.
 
-At the moment it is only available on Windows.
+Currently it is only available on Windows.
 
 ## Configuring and Building:
 ### Configuring:
@@ -29,8 +29,8 @@ This will generate `game.exe` in `build` directory.
 ## How to play:
 
 - Moving left/right: `A/D`
-- Rotating (90 degree, only clockwise): `R`
-- Instantly drop: `S`
+- Rotating (clockwise): `R`
+- Instant drop: `S`
 - Quit: `Q`
 - Manually get a new block (and delete the current one): `N`(*)
 
@@ -44,6 +44,7 @@ and then rebuild the project.
 
 - You can change the speed by modifying `GAME_DISTANCE_GAIN_RATE` in `game.h`. Default is set to `3.5`.
 - You can also change the size of playfield by modifying `GAME_PLAYFIELD_W` and `GAME_PLAYFIELD_H`. Default are `10` and `24` respectively, but I don't recommend changing it to anything below these values.
+- If you want to change the [Lock delay](https://tetris.wiki/Lock_delay), change the value of `GAME_LOCK_DELAY_FRAME_LIMIT`. Default is `18`.
 - And don't forget to rebuild after making these changes :D
 
 ## License:
