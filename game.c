@@ -242,13 +242,13 @@ int game_lockDelayFrameCounter = 0;
 int game_init_returnCode = ERROR_NONE;
 int game_update_returnCode = ERROR_NONE;
 int game_exitCode = ERROR_NONE;
-enum block_type game_currentBlock_type = TYPE_O;
+enum cell_type game_currentBlock_type = TYPE_NONE;
 enum rotation_state game_currentBlock_rotation = STATE_0;
 int game_playerScore = 0;
 int game_currentBlockPosX = GAME_BLOCK_STARTING_POS_X;
 int game_currentBlockPosY = GAME_BLOCK_STARTING_POS_Y;
-bool game_cellState[GAME_PLAYFIELD_H][GAME_PLAYFIELD_W] = {GAME_CELL_STATE_EMPTY};
-bool game_currentBlockTemplate[4][4] = {false};
+enum cell_type game_playfield_cellState[GAME_PLAYFIELD_H][GAME_PLAYFIELD_W];
+bool game_currentBlockTemplate_cell[4][4];
 
 #ifdef GAME_RULE_ENABLE_RANDOM_KEY
 bool game_flag_keyPressed_N = false;
@@ -259,36 +259,52 @@ const float distanceUpdateThreshold = 1.f / GAME_FPS;
 const float distanceGainPerUpdate = distanceUpdateThreshold * (float)(GAME_DISTANCE_GAIN_RATE);
 float distanceAccumulator = 0.f;
 
+
+void drawCell(const enum cell_type type) {
+        switch(type) {
+                case TYPE_O:
+                printf("%s", GAME_CELL_BLOCK_O);
+                break;
+
+                case TYPE_I:
+                printf("%s", GAME_CELL_BLOCK_I);
+                break;
+
+                case TYPE_L:
+                printf("%s", GAME_CELL_BLOCK_L);
+                break;
+
+                case TYPE_RL:
+                printf("%s", GAME_CELL_BLOCK_RL);
+                break;
+
+                case TYPE_S:
+                printf("%s", GAME_CELL_BLOCK_S);
+                break;
+
+                case TYPE_RS:
+                printf("%s", GAME_CELL_BLOCK_RS);
+                break;
+
+                case TYPE_T:
+                printf("%s", GAME_CELL_BLOCK_T);
+                break;
+
+                default:
+                printf("%s", GAME_CELL_BLOCK_NONE);
+                break;
+
+        }
+}
+
 void drawPlayerScoreBoard() {
-        int playerScoreValue = game_playerScore;
-        int digitCount = 0;
-        int offset = 0;
 
-        // Get number of digits of the current player's score; there is always at least one digit
-        do {
-                playerScoreValue /= 10;
-                digitCount++;
-        } while(playerScoreValue > 0);
-
-        // Draw vertical borders and the score inside
-        printf("%c", GAME_PLAYFIELD_BORDER_VERTICAL_CHAR);
-        offset = GAME_PLAYFIELD_W - digitCount;
-        for(int i = 0; i < offset; i++)
-                printf(" ");
-        printf("%d", game_playerScore);
-        printf("%c\n", GAME_PLAYFIELD_BORDER_VERTICAL_CHAR);
-
-        // Draw the lower border
-        printf("%c", GAME_PLAYFIELD_BORDER_CORNER_CHAR);
-        for(int j = 0; j < GAME_PLAYFIELD_W; j++)
-                printf("%c", GAME_PLAYFIELD_BORDER_HORIZONTAL_CHAR);
-        printf("%c\n", GAME_PLAYFIELD_BORDER_CORNER_CHAR);
 }
 
 void drawPlayfield() {
         // Draw the playfield with vertical borders
         for(int row = GAME_PLAYFIELD_VISIBLE_H - 1; row >= 0; row--) {
-                printf("%c", GAME_PLAYFIELD_BORDER_VERTICAL_CHAR);
+                printf("%s", GAME_PLAYFIELD_BORDER);
                 for(int column = 0; column < GAME_PLAYFIELD_W; column++) {
                         // Because all blocks are stored in a 4x4 square, this will check if the current coordinate is within that square or not
                         if(row > game_currentBlockPosY - 4 && row <= game_currentBlockPosY && column >= game_currentBlockPosX && column < game_currentBlockPosX + 4) {
@@ -296,30 +312,35 @@ void drawPlayfield() {
                                 int currentPosX_inTemplate = (column - game_currentBlockPosX);
                                 int currentPosY_inTemplate = (game_currentBlockPosY - row);
 
-                                if(game_currentBlockTemplate[currentPosY_inTemplate][currentPosX_inTemplate] || game_cellState[row][column])
-                                        printf("%c", GAME_CELL_OCCUPIED_CHAR);
-                                else printf("%c", GAME_CELL_EMPTY_CHAR);
-                        } else if(game_cellState[row][column])
-                                printf("%c", GAME_CELL_OCCUPIED_CHAR);
-                        else printf("%c", GAME_CELL_EMPTY_CHAR);
+                                if(game_currentBlockTemplate_cell[currentPosY_inTemplate][currentPosX_inTemplate])
+                                        drawCell(game_currentBlock_type);
+                                else if(game_playfield_cellState[row][column] != TYPE_NONE)
+                                        drawCell(game_playfield_cellState[row][column]);
+                                else drawCell(TYPE_NONE);
+                        } else if(game_playfield_cellState[row][column] != TYPE_NONE)
+                                drawCell(game_playfield_cellState[row][column]);
+                        else drawCell(TYPE_NONE);
                 }
-                printf("%c\n", GAME_PLAYFIELD_BORDER_VERTICAL_CHAR);
+
+                if(row == GAME_PLAYFIELD_VISIBLE_H - 1)
+                        printf("%s\tScore: %d\n", GAME_PLAYFIELD_BORDER, game_playerScore);
+                else printf("%s\n", GAME_PLAYFIELD_BORDER);
         }
         
         // Draw the bottom horizontal border
-        printf("%c", GAME_PLAYFIELD_BORDER_CORNER_CHAR);
+        printf("%s", GAME_PLAYFIELD_BORDER);
         for(int column = 0; column < GAME_PLAYFIELD_W; column++)
-                printf("%c", GAME_PLAYFIELD_BORDER_HORIZONTAL_CHAR);
-        printf("%c\n", GAME_PLAYFIELD_BORDER_CORNER_CHAR);
+                printf("%s", GAME_PLAYFIELD_BORDER);
+        printf("%s\n", GAME_PLAYFIELD_BORDER);
 };
 
 int getNewBlock() {
         distanceAccumulator = 0;
         game_currentBlockPosX = GAME_BLOCK_STARTING_POS_X;
         game_currentBlockPosY = GAME_BLOCK_STARTING_POS_Y;
-        game_currentBlock_type = rand() % TYPE_COUNT;
+        game_currentBlock_type = (enum cell_type)(rand() % TYPE_COUNT);
         game_currentBlock_rotation = STATE_0;
-        if(memcpy(game_currentBlockTemplate, game_blockTemplate[game_currentBlock_type][STATE_0], sizeof(game_currentBlockTemplate)) == NULL)
+        if(memcpy(game_currentBlockTemplate_cell, game_blockTemplate[game_currentBlock_type][STATE_0], sizeof(game_currentBlockTemplate_cell)) == NULL)
                 return ERROR_UPDATE_GET_NEW_BLOCK_FAILED;
 
         return ERROR_NONE;
@@ -327,7 +348,7 @@ int getNewBlock() {
 
 void rotateCurrentBlock() {
         game_currentBlock_rotation = (game_currentBlock_rotation + 1) % STATE_COUNT;
-        memcpy(game_currentBlockTemplate, game_blockTemplate[game_currentBlock_type][game_currentBlock_rotation], sizeof(game_currentBlockTemplate));
+        memcpy(game_currentBlockTemplate_cell, game_blockTemplate[game_currentBlock_type][game_currentBlock_rotation], sizeof(game_currentBlockTemplate_cell));
 }
 
 bool checkBlockValidPos(const int posX, const int posY) {
@@ -335,11 +356,11 @@ bool checkBlockValidPos(const int posX, const int posY) {
         for(int row = 0; row < 4; row++) {
                 for(int column = 0; column < 4; column++) {
                         // If the current block at specified position is out of playfield, return false immediately
-                        if(game_currentBlockTemplate[row][column] && (posX + column < 0 || posX + column >= GAME_PLAYFIELD_W || posY - row < 0)) 
+                        if(game_currentBlockTemplate_cell[row][column] && (posX + column < 0 || posX + column >= GAME_PLAYFIELD_W || posY - row < 0)) 
                                 return false;
 
                         // If the current block at specified position overlaps with any existing cell, return false immediately
-                        if(game_currentBlockTemplate[row][column] && game_cellState[posY - row][posX + column])
+                        if(game_currentBlockTemplate_cell[row][column] && game_playfield_cellState[posY - row][posX + column] != TYPE_NONE)
                                 return false;
                 }
         }
@@ -360,7 +381,7 @@ bool checkBlockValidState(const enum rotation_state rstate) {
                                 return false;
 
                         // If the current block at specified position overlaps with any existing cell, return false immediately
-                        if(blockTemplate[row][column] && game_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column])
+                        if(blockTemplate[row][column] && game_playfield_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column] != TYPE_NONE)
                                 return false;
                 }
         }
@@ -370,7 +391,7 @@ bool checkBlockValidState(const enum rotation_state rstate) {
 
 bool checkTerminated() {
         for(int column = 0; column < GAME_PLAYFIELD_W; column++) {
-                if(game_cellState[GAME_PLAYFIELD_VISIBLE_H - 2][column])
+                if(game_playfield_cellState[GAME_PLAYFIELD_VISIBLE_H - 2][column] != TYPE_NONE)
                         return true;
         }
 
@@ -383,8 +404,10 @@ bool checkRowToClear(int* upperRow, int* lowerRow) {
         bool result = false;
         for(int row = GAME_PLAYFIELD_H - 1; row >= 0; row--) {
                 int filledCellCount = 0;
-                for(int column = 0; column < GAME_PLAYFIELD_W; column++)
-                        filledCellCount += game_cellState[row][column];
+                for(int column = 0; column < GAME_PLAYFIELD_W; column++) {
+                        if(game_playfield_cellState[row][column] != TYPE_NONE)
+                                filledCellCount++;
+                        }
 
                 if(filledCellCount == GAME_PLAYFIELD_W) {
                         result = true;
@@ -411,16 +434,26 @@ int game_func_init() {
         // Clear the console
         system("cls");
 
+        // Init the playfield
+        for(int row = 0; row < GAME_PLAYFIELD_H; row++) {
+                for(int column = 0; column < GAME_PLAYFIELD_W; column++)
+                        game_playfield_cellState[row][column] = TYPE_NONE;
+        }
+
+        // Init the current block's template
+        for(int row = 0; row < 4; row++) {
+                for(int column = 0; column < 4; column++)
+                        game_currentBlockTemplate_cell[row][column] = 0;
+        }
+
         return game_init_returnCode = ERROR_NONE;
 }
 
 int game_func_draw() {
-        // Move cursor back to the beginning of the console instead of clearing the whole console and draw again
-        COORD cursorPos;
-        cursorPos = (COORD){0, 0};
-        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), cursorPos);
+        // Move cursor back to the beginning instead of clearing the whole console and draw again
+        SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), (COORD){0, 0});
 
-        // Draw the playfield and the scoreboard
+        // Draw the playfield and player's current Score
         drawPlayfield();
         drawPlayerScoreBoard();
 
@@ -495,8 +528,8 @@ int game_func_update() {
 
                 for(int row = 0; row < 4; row++) {
                         for(int column = 0; column < 4; column++) {
-                                if(game_currentBlockTemplate[row][column])
-                                        game_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column] = true;
+                                if(game_currentBlockTemplate_cell[row][column])
+                                        game_playfield_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column] = game_currentBlock_type;
                         }
                 }
 
@@ -526,8 +559,8 @@ int game_func_update() {
                         if(game_lockDelayFrameCounter >= GAME_LOCK_DELAY_FRAME_LIMIT) {
                                 for(int row = 0; row < 4; row++) {
                                         for(int column = 0; column < 4; column++) {
-                                                if(game_currentBlockTemplate[row][column])
-                                                        game_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column] = true;
+                                                if(game_currentBlockTemplate_cell[row][column])
+                                                        game_playfield_cellState[game_currentBlockPosY - row][game_currentBlockPosX + column] = game_currentBlock_type;
                                         }
                                 }
 
@@ -545,7 +578,7 @@ int game_func_update() {
         if(checkRowToClear(&upperRow, &lowerRow)) {
                 for(int rowToUpdate = upperRow; rowToUpdate >= lowerRow; rowToUpdate--) {
                         for(int currenRow = rowToUpdate + 1; currenRow < GAME_PLAYFIELD_H; currenRow++)
-                                memcpy(game_cellState[currenRow - 1], game_cellState[currenRow], sizeof(game_cellState[currenRow - 1]));
+                                memcpy(game_playfield_cellState[currenRow - 1], game_playfield_cellState[currenRow], sizeof(game_playfield_cellState[currenRow - 1]));
                 }
 
                 game_playerScore += (upperRow - lowerRow + 1);
