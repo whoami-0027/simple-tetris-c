@@ -1,0 +1,51 @@
+---
+Language: Cpp
+BasedOnStyle: GNU
+IndentWidth: 8
+SortIncludes: Never
+UseTab: Never
+BreakAfterReturnType: Automatic
+AlignAfterOpenBracket: DontAlign
+ColumnLimit: 80
+IncludeBlocks: Preserve
+IndentPPDirectives: AfterHash
+IndentWrappedFunctionNames: true
+PointerAlignment: Left
+QualifierAlignment: Leave
+ReferenceAlignment: Left
+SpacesInParens: Custom
+SpacesInParensOptions:
+        InEmptyParentheses: false
+        InCStyleCasts: false
+        Other: true
+SpacesInSquareBrackets: false
+KeepEmptyLines:
+        AtEndOfFile: false
+        AtStartOfBlock: false
+        AtStartOfFile: false
+SpaceBeforeParens: Custom
+SpaceBeforeParensOptions:
+        AfterControlStatements: false
+        AfterForeachMacros: false
+        AfterFunctionDeclarationName: false
+        AfterFunctionDefinitionName: false
+        AfterIfMacros: false
+        BeforeNonEmptyParentheses: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeSquareBrackets: false
+IndentGotoLabels: false
+IndentCaseLabels: false
+IndentCaseBlocks: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBraces: Custom
+BraceWrapping:
+        IndentBraces: false
+        BeforeWhile: false
+        SplitEmptyFunction: false
+        AfterFunction: true
+MaxEmptyLinesToKeep: 2
+...
