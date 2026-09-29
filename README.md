@@ -16,7 +16,7 @@ Clone this repository, go into its root directory, then configure with:
 
     cmake -S . -B build -G "MinGW Makefiles" -DCMAKE_C_COMPILER=clang
 
-Additionally you can add `-DCMAKE_EXPORT_COMPILE_COMMANDS` to generate `compile_commands.json` used by `clangd` (which I do)
+Additionally you can add `-DCMAKE_EXPORT_COMPILE_COMMANDS` to generate `compile_commands.json` used by `clangd` (which I use)
 
 ### Building:
 
@@ -42,7 +42,7 @@ and then rebuild the project.
 
 ## Additional information:
 
-- You can change the speed by modifying `GAME_DISTANCE_GAIN_RATE` in `game.h`. Default is set to `3`.
+- You can change the speed by modifying `GAME_DISTANCE_GAIN_RATE` in `game.h`. Default is set to `0.5`.
 - You can also change the size of playfield by modifying `GAME_PLAYFIELD_W` and `GAME_PLAYFIELD_H`. Default are `10` and `24` respectively, but I don't recommend changing it to anything below these values.
 - If you want to reduce or increase duration of [lock delay](https://tetris.wiki/Lock_delay), change the value of `GAME_LOCK_DELAY_FRAME_LIMIT`. Default is `5`.
 - And don't forget to rebuild after making these changes :D
